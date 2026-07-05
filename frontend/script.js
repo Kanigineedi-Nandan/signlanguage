@@ -21,7 +21,7 @@
 // ═══════════════════════════════════════════════════════════════════
 
 const CONFIG = {
-  wsUrl:        `wss://https://signlanguage-6szs.onrender.com//ws/translate`,
+  wsUrl:        `wss://signlanguage-6szs.onrender.com/ws/translate`,
   targetFps:    15,     // increased for faster recognition response
   jpegQuality:  0.6,    // slightly lower quality = smaller payload = faster
   captureWidth:  320,   // smaller frame = much faster MediaPipe processing
