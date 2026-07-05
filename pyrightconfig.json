@@ -1,0 +1,14 @@
+{
+  "venvPath": "backend",
+  "venv": "venv",
+  "typeCheckingMode": "off",
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none",
+  "reportUndefinedVariable": "none",
+  "reportAttributeAccessIssue": "none",
+  "reportGeneralTypeIssues": "none",
+  "reportOptionalMemberAccess": "none",
+  "reportIndexIssue": "none",
+  "useLibraryCodeForTypes": true,
+  "ignore": ["**"]
+}

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign Language Translator | Live ASL Recognition</title>
+  <meta name="description" content="Real-time sign language to text translator using AI hand-landmark detection. Demo ASL signs live from your webcam." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       HEADER
+  ═══════════════════════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="header-brand">
+      <div class="brand-icon">🤟</div>
+      <div class="brand-text">
+        <h1>Sign Language Translator</h1>
+        <span class="brand-sub">Real-time ASL → Text via AI</span>
+      </div>
+    </div>
+    <div class="header-controls">
+      <button id="btn-start-stop" class="btn btn-primary" aria-label="Start Translation">
+        <span class="btn-icon">▶</span>
+        <span class="btn-label">Start Translation</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════════════
+       MAIN SPLIT LAYOUT
+  ═══════════════════════════════════════════════════════════ -->
+  <main class="app-main">
+
+    <!-- ── LEFT HALF: Camera ── -->
+    <section class="camera-section" id="camera-section" aria-label="Live camera feed">
+
+      <!-- Live video element -->
+      <video
+        id="video"
+        autoplay
+        muted
+        playsinline
+        aria-label="Webcam feed for sign language recognition"
+      ></video>
+
+      <!-- Hidden canvas used for frame capture -->
+      <canvas id="capture-canvas" aria-hidden="true"></canvas>
+
+      <!-- Overlay: permission request or loading -->
+      <div class="camera-overlay" id="camera-overlay">
+        <div class="overlay-content">
+          <div class="overlay-icon">📷</div>
+          <h2>Camera Permission Required</h2>
+          <p>This app needs access to your webcam to detect sign language gestures.</p>
+          <button id="btn-permission" class="btn btn-primary">
+            <span class="btn-icon">🔓</span>
+            <span class="btn-label">Grant Camera Access</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Recording indicator (top-right badge) -->
+      <div class="recording-badge" id="recording-badge" aria-live="polite">
+        <span class="rec-dot" id="rec-dot"></span>
+        <span class="rec-label" id="rec-label">IDLE</span>
+      </div>
+
+      <!-- FPS / frame counter (top-left) -->
+      <div class="fps-badge" id="fps-badge">
+        <span id="fps-value">0</span> FPS
+      </div>
+
+      <!-- Hand landmark visual overlay canvas -->
+      <canvas id="landmark-canvas" aria-hidden="true"></canvas>
+
+      <!-- Current sign detected — shown inside camera pane -->
+      <div class="camera-sign-overlay" id="camera-sign-overlay">
+        <span class="camera-sign-chip" id="camera-sign-chip">—</span>
+        <div class="camera-conf-bar-wrap">
+          <div class="camera-conf-bar" id="camera-conf-bar"></div>
+        </div>
+        <span class="camera-conf-value" id="camera-conf-value">0%</span>
+      </div>
+
+    </section>
+
+    <!-- ── RIGHT HALF: Translation Panel ── -->
+    <section class="translation-section" aria-label="Translation output">
+
+      <!-- ── Status Bar ── -->
+      <div class="status-bar" role="status" aria-live="polite">
+
+        <!-- Connection pill -->
+        <div class="status-pill disconnected" id="connection-pill">
+          <span class="pill-dot" id="conn-dot"></span>
+          <span class="pill-label" id="conn-label">Disconnected</span>
+        </div>
+
+        <!-- Detected sign (live) -->
+        <div class="current-sign-display">
+          <span class="sign-label-heading">Detected:</span>
+          <span class="sign-chip" id="current-sign">—</span>
+          <div class="confidence-bar-wrap">
+            <div class="confidence-bar" id="confidence-bar"></div>
+          </div>
+          <span class="confidence-value" id="confidence-value">0%</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="status-actions">
+          <button id="btn-clear" class="btn btn-ghost" aria-label="Clear translated text">
+            🗑 Clear
+          </button>
+          <button id="btn-copy" class="btn btn-ghost" aria-label="Copy translated text">
+            📋 Copy
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Text Output ── -->
+      <div class="text-output-wrap">
+        <textarea
+          id="translation-output"
+          class="translation-output"
+          readonly
+          placeholder="Your translated text will appear here…"
+          aria-label="Translated sign language text"
+          spellcheck="false"
+        ></textarea>
+
+        <!-- Ghost tip shown when empty -->
+        <div class="output-tip" id="output-tip">
+          <span>👋 Show your hand to the camera and start signing!</span>
+        </div>
+      </div>
+
+      <details class="sign-reference" id="sign-reference">
+        <summary>📖 ASL Alphabet Reference (A–Z)</summary>
+        <div class="reference-grid">
+          <div class="ref-item"><span class="ref-sign">A</span><span class="ref-desc">Closed fist, thumb on side</span></div>
+          <div class="ref-item"><span class="ref-sign">B</span><span class="ref-desc">4 fingers up, thumb tucked</span></div>
+          <div class="ref-item"><span class="ref-sign">C</span><span class="ref-desc">Curved C shape</span></div>
+          <div class="ref-item"><span class="ref-sign">D</span><span class="ref-desc">Index up, thumb↔middle circle</span></div>
+          <div class="ref-item"><span class="ref-sign">E</span><span class="ref-desc">Fingers curled, thumb tucked</span></div>
+          <div class="ref-item"><span class="ref-sign">F</span><span class="ref-desc">Index+thumb circle, 3 up</span></div>
+          <div class="ref-item"><span class="ref-sign">G</span><span class="ref-desc">Index+thumb pointing sideways</span></div>
+          <div class="ref-item"><span class="ref-sign">H</span><span class="ref-desc">Index+middle horizontal</span></div>
+          <div class="ref-item"><span class="ref-sign">I</span><span class="ref-desc">Pinky only up</span></div>
+          <div class="ref-item"><span class="ref-sign">J</span><span class="ref-desc">Pinky up (like I + motion)</span></div>
+          <div class="ref-item"><span class="ref-sign">K</span><span class="ref-desc">Index+middle up, thumb between</span></div>
+          <div class="ref-item"><span class="ref-sign">L</span><span class="ref-desc">Index up, thumb out (L shape)</span></div>
+          <div class="ref-item"><span class="ref-sign">M</span><span class="ref-desc">3 fingers over thumb</span></div>
+          <div class="ref-item"><span class="ref-sign">N</span><span class="ref-desc">2 fingers over thumb</span></div>
+          <div class="ref-item"><span class="ref-sign">O</span><span class="ref-desc">All fingers form O circle</span></div>
+          <div class="ref-item"><span class="ref-sign">P</span><span class="ref-desc">K shape, fingers pointing down</span></div>
+          <div class="ref-item"><span class="ref-sign">Q</span><span class="ref-desc">G shape, pointing down</span></div>
+          <div class="ref-item"><span class="ref-sign">R</span><span class="ref-desc">Index+middle crossed</span></div>
+          <div class="ref-item"><span class="ref-sign">S</span><span class="ref-desc">Fist, thumb across fingers</span></div>
+          <div class="ref-item"><span class="ref-sign">T</span><span class="ref-desc">Thumb between index+middle</span></div>
+          <div class="ref-item"><span class="ref-sign">U</span><span class="ref-desc">Index+middle up, together</span></div>
+          <div class="ref-item"><span class="ref-sign">V</span><span class="ref-desc">Index+middle up, spread (V)</span></div>
+          <div class="ref-item"><span class="ref-sign">W</span><span class="ref-desc">Index+middle+ring spread</span></div>
+          <div class="ref-item"><span class="ref-sign">X</span><span class="ref-desc">Index finger hooked</span></div>
+          <div class="ref-item"><span class="ref-sign">Y</span><span class="ref-desc">Thumb+pinky out (shaka)</span></div>
+          <div class="ref-item"><span class="ref-sign">Z</span><span class="ref-desc">Index traces Z (index up)</span></div>
+        </div>
+      </details>
+
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
